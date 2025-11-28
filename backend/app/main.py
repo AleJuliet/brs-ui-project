@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException, Path as FastAPIPath
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
+from PIL import Image
 import numpy as np
+import io
 
 from .config import CORS_ORIGINS
 from .models import CaptureSummary, CaptureDetail, Labels, PointCloudInfo
@@ -85,12 +87,51 @@ async def get_image(
     capture_id: str = FastAPIPath(..., description="Capture ID"),
     camera_id: str = FastAPIPath(..., description="Camera ID (CAM1, CAM2, or CAM3)")
 ):
-    """Serve image files"""
+    """Serve image files, converting and stretching histogram for visibility"""
     image_path = get_image_path(date, capture_id, camera_id)
     if not image_path:
         raise HTTPException(status_code=404, detail=f"Image {camera_id} not found for capture {capture_id}")
     
-    return FileResponse(image_path, media_type="image/png")
+    try:
+        # Open the image
+        img = Image.open(image_path)
+        
+        # Convert to numpy array
+        img_array = np.array(img)
+        
+        # Handle RGB/RGBA by taking first channel (grayscale stored in all channels)
+        if img_array.ndim == 3:
+            img_array = img_array[:, :, 0]
+        
+        # Convert to float for processing
+        img_array = img_array.astype(np.float32)
+        
+        # Stretch histogram from actual min/max to full 0-255 range
+        img_min = img_array.min()
+        img_max = img_array.max()
+        
+        if img_max > img_min:
+            # Stretch values from [min, max] to [0, 255]
+            img_array = ((img_array - img_min) / (img_max - img_min) * 255.0)
+        else:
+            # All pixels same value, make them mid-gray
+            img_array = np.full_like(img_array, 128.0)
+        
+        # Convert to uint8
+        img_array = np.clip(img_array, 0, 255).astype(np.uint8)
+        
+        # Convert back to PIL Image
+        img = Image.fromarray(img_array, mode='L')
+        
+        # Save to bytes buffer
+        buf = io.BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        
+        return StreamingResponse(buf, media_type="image/png")
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process image: {str(e)}")
 
 
 @app.get("/api/dates/{date}/captures/{capture_id}/point_cloud/info", response_model=PointCloudInfo)
