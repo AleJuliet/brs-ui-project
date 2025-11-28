@@ -13,7 +13,8 @@ from .file_scanner import (
     get_captures_for_date,
     get_capture_detail,
     get_image_path,
-    get_point_cloud_path
+    get_point_cloud_path,
+    get_brick_info_path
 )
 from .manifest import create_or_update_manifest
 
@@ -132,6 +133,24 @@ async def get_image(
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process image: {str(e)}")
+
+@app.get("/api/dates/{date}/captures/{capture_id}/brick_info")
+async def get_brick_info(
+    date: str = FastAPIPath(..., description="Date in YYYY-MM-DD format"),
+    capture_id: str = FastAPIPath(..., description="Capture ID")
+):
+    # Construct path to brick_info.txt
+    brick_info_path = get_brick_info_path(date, capture_id)
+    
+    if not brick_info_path.exists():
+        raise HTTPException(status_code=404, detail=f"brick_info.txt not found for capture {capture_id}")
+    
+    try:
+        with open(brick_info_path, 'r') as f:
+            content = f.read()
+        return {"content": content}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read brick_info.txt: {str(e)}")
 
 
 @app.get("/api/dates/{date}/captures/{capture_id}/point_cloud/info", response_model=PointCloudInfo)

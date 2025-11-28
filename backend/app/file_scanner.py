@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 from typing import List, Optional
 import re
+import numpy as np
+import open3d as o3d
 
 from .config import RESULTS_ROOT
 from .models import CaptureSummary, CaptureDetail
@@ -111,3 +113,28 @@ def get_point_cloud_path(date: str, capture_id: str) -> Optional[Path]:
     """Get the full path to a point cloud file"""
     pc_path = RESULTS_ROOT / date / capture_id / "point_cloud.npy"
     return pc_path if pc_path.exists() else None
+
+def get_brick_info_path(date: str, capture_id: str) -> Optional[Path]:
+    """Get the full path to the brick_info.txt file"""
+    info_path = RESULTS_ROOT / date / capture_id / "brick_info.txt"
+    return info_path if info_path.exists() else None
+
+## I want to create an endpoint that downsamples the point cloud and returns the downsampled data as a list of points.
+def downsample_point_cloud(date: str, capture_id: str, voxel_size: float = 0.1) -> Optional[List[List[float]]]:
+    """Downsample the point cloud and return as a list of points"""
+    pc_path = RESULTS_ROOT / date / capture_id / "point_cloud.npy"
+    
+    if not pc_path.exists():
+        return None
+
+    # Load point cloud
+    points = np.load(pc_path)
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(points)
+
+    # Downsample
+    downsampled_pcd = pcd.voxel_down_sample(voxel_size=voxel_size)
+
+    # Convert back to list of points
+    downsampled_points = np.asarray(downsampled_pcd.points).tolist()
+    return {"points": downsampled_points}
