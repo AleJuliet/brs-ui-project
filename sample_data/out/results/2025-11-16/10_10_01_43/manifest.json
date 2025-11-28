@@ -1,0 +1,12 @@
+{
+  "capture_id": "10_10_01_43",
+  "created_at": "2025-11-17T15:20:23.634044",
+  "metadata": {},
+  "labeled_at": "2025-11-17T15:50:23.634046",
+  "labels": {
+    "validity": "valid",
+    "color": "red",
+    "shape": "brick",
+    "markings": "LEGO logo"
+  }
+}

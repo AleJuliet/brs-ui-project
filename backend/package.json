@@ -1,0 +1,1 @@
+{\n  \"name\": \"brs-backend\",\n  \"version\": \"1.0.0\",\n  \"description\": \"FastAPI backend for BRS Classification Review Tool\",\n  \"scripts\": {\n    \"start\": \"python -m app.main\",\n    \"dev\": \"uvicorn app.main:app --reload\"\n  },\n  \"keywords\": [\"fastapi\", \"lego\", \"classification\", \"review\"],\n  \"author\": \"BRS Team\"\n}

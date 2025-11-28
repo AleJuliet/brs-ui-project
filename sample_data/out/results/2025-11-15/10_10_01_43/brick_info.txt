@@ -1,0 +1,6 @@
+Brick Classification Results
+Timestamp: 2025-11-17T15:20:23.619090
+Predicted Class: LEGO Brick 2x4
+Confidence: 0.87
+Color Prediction: Red
+Shape: Rectangular

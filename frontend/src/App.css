@@ -1,0 +1,47 @@
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.image-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.image-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.capture-item {
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin: 2px 0;
+  transition: background-color 0.2s;
+}
+
+.capture-item:hover {
+  background-color: #f0f0f0;
+}
+
+.capture-item.selected {
+  background-color: #e3f2fd;
+}
+
+.capture-item.labeled {
+  border-left: 4px solid #4caf50;
+}
