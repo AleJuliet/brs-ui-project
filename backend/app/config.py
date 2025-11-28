@@ -1,7 +1,7 @@
 from pathlib import Path
 
 # Configuration for Sorty results
-RESULTS_ROOT = Path("/Users/dkaleper/Documents/Miscellaneous Resources/Code Projects/brs-ui-project/sample_data/out/results")  # Change this path as needed
+RESULTS_ROOT = Path("/Users/dkaleper/Documents/Miscellaneous Resources/Code Projects/brs-ui-project/test_data/out/results")  # Change this path as needed
 
 # API Configuration
 API_HOST = "127.0.0.1"
