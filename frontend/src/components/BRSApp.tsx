@@ -129,25 +129,6 @@ const BRSApp: React.FC = () => {
           onDateSelect={handleDateSelect}
         />
 
-        {/* Dates List */}
-        <Box sx={{ p: 1 }}>
-          <Typography variant="subtitle2" sx={{ px: 1, py: 1, fontWeight: 'bold' }}>
-            Dates
-          </Typography>
-          <List dense>
-            {dates.map((date) => (
-              <ListItem key={date} disablePadding>
-                <ListItemButton
-                  selected={selectedDate === date}
-                  onClick={() => handleDateSelect(date)}
-                >
-                  <ListItemText primary={date} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-
         <Divider />
 
         {/* Captures List */}

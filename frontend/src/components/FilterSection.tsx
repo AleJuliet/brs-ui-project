@@ -5,14 +5,10 @@
 * Initially it will filter by date, but more filters can be added later.
 */
 import React from 'react';
-import {
-  Box,
-  Typography,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import NativeSelect from '@mui/material/NativeSelect';
 
 interface FilterSectionProps {
   dates: string[];
@@ -27,21 +23,23 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 }) => {
   return (
     <Box sx={{ width: 300, p: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Filter by Date
-      </Typography>
-        <List>
-          {dates.map((date) => (
-            <ListItem key={date} disablePadding>
-              <ListItemButton
-                selected={selectedDate === date}
-                onClick={() => onDateSelect(date)}
-              >
-                <ListItemText primary={date} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+      <FormControl fullWidth>
+        <InputLabel variant="standard" htmlFor="uncontrolled-native">
+          Date
+        </InputLabel>
+        <NativeSelect
+          defaultValue={selectedDate}
+          inputProps={{
+            name: 'date',
+            id: 'uncontrolled-native'
+          }}
+          onChange={(e) => onDateSelect(e.target.value)}
+          >
+            {dates.map((date) => (
+              <option value={date}>{date}</option>
+            ))}
+          </NativeSelect>
+      </FormControl>
     </Box>
   );
 };
