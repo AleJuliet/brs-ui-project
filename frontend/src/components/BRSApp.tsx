@@ -105,7 +105,7 @@ const BRSApp: React.FC = () => {
       >
         <Box sx={{ p: 2 }}>
           <Typography variant="h6" component="h1">
-            BRS Labelling Tool
+            BRS Capture Review
           </Typography>
         </Box>
         <Divider />
