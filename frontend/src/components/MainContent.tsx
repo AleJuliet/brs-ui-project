@@ -18,6 +18,10 @@ import { apiService } from '../services/api';
 import { CaptureSummary, CaptureDetail, Labels, PointCloudInfo, BrickInfo } from '../types/api';
 import InfoSection from './InfoSection';
 import { Dialog, DialogContent } from "@mui/material";
+import PointCloudViewer from './PointCloudViewer';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 
 interface MainContentProps {
   date: string;
@@ -54,6 +58,8 @@ const MainContent: React.FC<MainContentProps> = ({
     color: '',
     shape: '',
     markings: '',
+    correctColor: false,
+    correctShape: false
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -207,8 +213,6 @@ const MainContent: React.FC<MainContentProps> = ({
               </Typography>
           </Grid>
       </Grid>
-      
-      
 
       {saveMessage && (
         <Alert severity="success" sx={{ mb: 2 }}>
@@ -216,93 +220,120 @@ const MainContent: React.FC<MainContentProps> = ({
         </Alert>
       )}
 
-      <Grid container spacing={3}>
-        {/* Images Section */}
+      <Grid container spacing={2}>
+        {/* Images and Point cloud*/}
         <Grid size={{ xs: 12, md: 8 }}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Camera Images
-            </Typography>
-            <Grid container spacing={2}>
-              {imageUrls.map(({ cameraId, url }) => (
-                <Grid size={{ xs: 12, md: 4 }} key={cameraId}>
-                  <Card>
-                    <CardMedia
-                      component="img"
-                      image={url}
-                      alt={`${cameraId} Image`}
-                      sx={{ height: 200, objectFit: 'cover' }}
-                      onClick={() => handleOpen(url, cameraId)}
-                      style={{ cursor: 'pointer'  }}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        target.nextElementSibling?.removeAttribute('style');
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        height: 200,
-                        display: 'none',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        bgcolor: 'grey.200',
-                      }}
-                    >
-                      <Typography color="text.secondary">Image not available</Typography>
-                    </Box>
-                    <CardContent>
-                      <Typography variant="subtitle2">{cameraId}</Typography>
-                    </CardContent>
-                  </Card>
+
+          <Grid container spacing={3}>
+            {/* Images Section */}
+            <Grid size={{ xs: 12, md: 12 }}>
+              <Paper sx={{ p: 2 }}>
+                <Typography variant="h6" gutterBottom>
+                  Camera Images
+                </Typography>
+                <Grid container spacing={2}>
+                  {imageUrls.map(({ cameraId, url }) => (
+                    <Grid size={{ xs: 12, md: 6 }} key={cameraId}>
+                      <Card>
+                        <CardMedia
+                          component="img"
+                          image={url}
+                          alt={`${cameraId} Image`}
+                          sx={{ height: 200, objectFit: 'cover' }}
+                          onClick={() => handleOpen(url, cameraId)}
+                          style={{ cursor: 'pointer'  }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.nextElementSibling?.removeAttribute('style');
+                          }}
+                        />
+                        <Box
+                          sx={{
+                            height: 200,
+                            display: 'none',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'grey.200',
+                          }}
+                        >
+                          <Typography color="text.secondary">Image not available</Typography>
+                        </Box>
+                        <CardContent>
+                          <Typography variant="subtitle2">{cameraId}</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
                 </Grid>
-              ))}
+              </Paper>
+
+              
             </Grid>
-          </Paper>
 
-          
-        </Grid>
-      </Grid>
-
-      {brickInfo && (
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Paper sx={{ p: 2, mt: 2 }}>
-            <InfoSection capture={brickInfo} />
-            </Paper>
+            {captureDetail.point_cloud_exists && (
+              <Grid size={{ xs: 12, md: 12 }}>
+                <Paper sx={{ p: 2, mt: 2 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Point Cloud Information
+                  </Typography>
+                  {pointCloudInfo ? (
+                    <PointCloudViewer date={date} captureId={capture.capture_id} />
+                  ) : (
+                    <Typography color="text.secondary">Loading point cloud info...</Typography>
+                  )}
+                </Paper>
+              </Grid>
+            )}
           </Grid>
+        </Grid>
 
-          {/* Point Cloud Section */}
-          {captureDetail.point_cloud_exists && (
-            <Grid size={{ xs: 12, md: 8 }}>
+          {/* Info and buttons*/}
+          <Grid size={{ xs: 12, md: 4 }}>
+           {brickInfo && (
+                <Paper sx={{ p: 2, mt: 2 }}>
+                <InfoSection capture={brickInfo} />
+                </Paper>
+            )}
             <Paper sx={{ p: 2, mt: 2 }}>
               <Typography variant="h6" gutterBottom>
-                Point Cloud Information
+                Validation
               </Typography>
-              {pointCloudInfo ? (
-                <Box>
-                  <Typography variant="body2">
-                    Status: <Chip label="Available" color="success" size="small" />
-                  </Typography>
-                  {pointCloudInfo.num_points !== undefined && (
-                    <Typography variant="body2">
-                      Points: {pointCloudInfo.num_points?.toLocaleString()}
-                    </Typography>
-                  )}
-                  {pointCloudInfo.file_size !== undefined && (
-                    <Typography variant="body2">
-                      File Size: {(pointCloudInfo.file_size / 1024 / 1024).toFixed(2)} MB
-                    </Typography>
-                  )}
-                </Box>
-              ) : (
-                <Typography color="text.secondary">Loading point cloud info...</Typography>
-              )}
-            </Paper>
-            </Grid>
-          )}
-        </Grid>
-      )}
+              {/** Checkbox asking validation correct color and shape */}
+              <FormGroup>
+                <FormControlLabel
+                  control={<Checkbox checked={labels.correctColor} onChange={(e) => handleLabelChange('correctColor', e.target.checked)} />}
+                  label="Correct Color"
+                />
+                <FormControlLabel
+                  control={<Checkbox checked={labels.correctShape} onChange={(e) => handleLabelChange('correctShape', e.target.checked)} />}
+                  label="Correct Shape"
+                />
+              </FormGroup>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<SaveIcon />}
+                  onClick={handleSave}
+                  disabled={saving}
+                >
+                  {saving ? 'Saving...' : 'Save Labels'}
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  endIcon={<NextIcon />}
+                  onClick={handleSaveAndNext}
+                  disabled={saving || !nextCapture}
+                >
+                  {saving ? 'Saving...' : 'Save & Next'}
+                </Button>
+              </Box>
+            </Paper>  
+          </Grid>
+
+      </Grid>
 
       {/* Modal with zoomed image */}
       <Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth>
@@ -326,8 +357,7 @@ const MainContent: React.FC<MainContentProps> = ({
           )}
         </DialogContent>
       </Dialog>
-     
-      
+
     </Box>
   );
 };

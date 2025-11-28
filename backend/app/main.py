@@ -14,7 +14,8 @@ from .file_scanner import (
     get_capture_detail,
     get_image_path,
     get_point_cloud_path,
-    get_brick_info_path
+    get_brick_info_path,
+    downsample_point_cloud
 )
 from .manifest import create_or_update_manifest
 
@@ -176,6 +177,18 @@ async def get_point_cloud_info(
         )
     except Exception as e:
         return PointCloudInfo(exists=True, num_points=None, file_size=pc_path.stat().st_size)
+    
+@app.get("/api/dates/{date}/captures/{capture_id}/point_cloud/downsampled")
+async def get_downsampled_point_cloud(
+    date: str = FastAPIPath(..., description="Date in YYYY-MM-DD format"),
+    capture_id: str = FastAPIPath(..., description="Capture ID"),
+    voxel_size: float = 0.1
+):  
+    downsampled_data = downsample_point_cloud(date, capture_id, voxel_size)
+    if downsampled_data is None:
+        raise HTTPException(status_code=404, detail=f"Point cloud not found for capture {capture_id}")
+    
+    return downsampled_data
 
 
 if __name__ == "__main__":

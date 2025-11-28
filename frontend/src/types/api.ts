@@ -3,6 +3,8 @@ export interface Labels {
   color?: string;
   shape?: string;
   markings?: string;
+  correctColor?: boolean;
+  correctShape?: boolean;
 }
 
 export interface Manifest {

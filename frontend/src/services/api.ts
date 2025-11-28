@@ -71,4 +71,9 @@ export const apiService = {
   async getPointCloudInfo(date: string, captureId: string): Promise<PointCloudInfo> {
     return fetchApi<PointCloudInfo>(`/dates/${date}/captures/${captureId}/point_cloud/info`);
   },
+
+  // Get downsampled point cloud data
+  async getPointCloud(date: string, captureId: string, voxelSize: number = 0.1): Promise<{ points: number[][] }> {
+    return fetchApi<{ points: number[][] }>(`/dates/${date}/captures/${captureId}/point_cloud/downsampled?voxel_size=${voxelSize}`);
+  }
 };

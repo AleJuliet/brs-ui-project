@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import List, Optional
 import re
 import numpy as np
-import open3d as o3d
 
 from .config import RESULTS_ROOT
 from .models import CaptureSummary, CaptureDetail
@@ -123,18 +122,21 @@ def get_brick_info_path(date: str, capture_id: str) -> Optional[Path]:
 def downsample_point_cloud(date: str, capture_id: str, voxel_size: float = 0.1) -> Optional[List[List[float]]]:
     """Downsample the point cloud and return as a list of points"""
     pc_path = RESULTS_ROOT / date / capture_id / "point_cloud.npy"
+    max_points = 10000  # Limit number of points for browser visualization
     
     if not pc_path.exists():
         return None
 
     # Load point cloud
-    points = np.load(pc_path)
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(points)
+    pc = np.load(pc_path)
+    mask = pc[:, 2] > 1.5
+    pc = pc[mask]
 
-    # Downsample
-    downsampled_pcd = pcd.voxel_down_sample(voxel_size=voxel_size)
+    # Optionally downsample here...
+    #pc = pc[::downsample]
 
-    # Convert back to list of points
-    downsampled_points = np.asarray(downsampled_pcd.points).tolist()
-    return {"points": downsampled_points}
+    # Convert to list format for JSON
+    points_list = pc.tolist()
+
+    # Convert to normal Python list for JSON
+    return {"points": points_list}
