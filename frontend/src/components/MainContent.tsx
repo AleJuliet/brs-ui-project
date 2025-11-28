@@ -15,7 +15,9 @@ import {
 import Grid from '@mui/material/Grid';
 import { Save as SaveIcon, NavigateNext as NextIcon } from '@mui/icons-material';
 import { apiService } from '../services/api';
-import { CaptureSummary, CaptureDetail, Labels, PointCloudInfo } from '../types/api';
+import { CaptureSummary, CaptureDetail, Labels, PointCloudInfo, BrickInfo } from '../types/api';
+import InfoSection from './InfoSection';
+import { Dialog, DialogContent } from "@mui/material";
 
 interface MainContentProps {
   date: string;
@@ -23,6 +25,19 @@ interface MainContentProps {
   nextCapture: CaptureSummary | null;
   onLabelsUpdated: () => void;
   onNextCapture: () => void;
+}
+
+const parseBrickInfo = (text: string) => {
+  const lines = text.split('\n');
+  const info: any = {};
+  lines.forEach(line => {
+    const [key, value] = line.split(':').map(part => part.trim());
+    if (key && value) {
+      const formattedKey = key.toLowerCase().replace(/ /g, '_');
+      info[formattedKey] = isNaN(Number(value)) ? value : Number(value);
+    }
+  });
+  return info as BrickInfo;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
@@ -44,10 +59,26 @@ const MainContent: React.FC<MainContentProps> = ({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [brickInfo, setBrickInfo] = useState<BrickInfo | null>(null);
+  const [open, setOpen] = useState(false);
+  const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
 
   useEffect(() => {
     loadCaptureDetail();
   }, [date, capture.capture_id]);
+
+  const handleOpen = (url: string, label: string) => {
+    setSelectedUrl(url);
+    setSelectedLabel(label);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedUrl(null);
+    setSelectedLabel(null);
+  };
 
   const loadCaptureDetail = async () => {
     try {
@@ -55,6 +86,12 @@ const MainContent: React.FC<MainContentProps> = ({
       setError(null);
       
       const detail = await apiService.getCaptureDetail(date, capture.capture_id);
+      const brickInfoText = await apiService.getBrickInfo(date, capture.capture_id);
+
+      // Parse and convert brickInfoText to BrickInfo object
+      const parsedBrickInfo = parseBrickInfo(brickInfoText);
+      setBrickInfo(parsedBrickInfo);
+
       setCaptureDetail(detail);
       
       // Load existing labels if they exist
@@ -195,6 +232,8 @@ const MainContent: React.FC<MainContentProps> = ({
                       image={url}
                       alt={`${cameraId} Image`}
                       sx={{ height: 200, objectFit: 'cover' }}
+                      onClick={() => handleOpen(url, cameraId)}
+                      style={{ cursor: 'pointer'  }}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
@@ -221,8 +260,21 @@ const MainContent: React.FC<MainContentProps> = ({
             </Grid>
           </Paper>
 
+          
+        </Grid>
+      </Grid>
+
+      {brickInfo && (
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Paper sx={{ p: 2, mt: 2 }}>
+            <InfoSection capture={brickInfo} />
+            </Paper>
+          </Grid>
+
           {/* Point Cloud Section */}
           {captureDetail.point_cloud_exists && (
+            <Grid size={{ xs: 12, md: 8 }}>
             <Paper sx={{ p: 2, mt: 2 }}>
               <Typography variant="h6" gutterBottom>
                 Point Cloud Information
@@ -247,10 +299,35 @@ const MainContent: React.FC<MainContentProps> = ({
                 <Typography color="text.secondary">Loading point cloud info...</Typography>
               )}
             </Paper>
+            </Grid>
           )}
         </Grid>
+      )}
+
+      {/* Modal with zoomed image */}
+      <Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth>
+        <DialogContent
+          sx={{
+            backgroundColor: "black",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {selectedUrl && (
+            <img
+              src={selectedUrl}
+              alt={selectedLabel ?? ""}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "80vh",
+                objectFit: "contain",
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
      
-      </Grid>
+      
     </Box>
   );
 };

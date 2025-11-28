@@ -22,6 +22,16 @@ export interface CaptureSummary {
   has_point_cloud: boolean;
 }
 
+export interface BrickInfo {
+  trigger_id: string;
+  color_prediction: string;
+  photo_timestamp: string;
+  brick_id: string;
+  laser_timestamp: string;
+  super_id: string;
+  bucket_number: string;
+}
+
 export interface CaptureDetail {
   capture_id: string;
   date: string;

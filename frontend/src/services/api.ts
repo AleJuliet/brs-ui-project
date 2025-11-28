@@ -61,6 +61,12 @@ export const apiService = {
     return `${API_BASE_URL}/dates/${date}/captures/${captureId}/image/${cameraId}`;
   },
 
+  // Get brick_info txt file contents
+  async getBrickInfo(date: string, captureId: string): Promise<string> {
+    const response = await fetchApi<{ content: string }>(`/dates/${date}/captures/${captureId}/brick_info`);
+    return response.content;
+  },
+
   // Get point cloud info
   async getPointCloudInfo(date: string, captureId: string): Promise<PointCloudInfo> {
     return fetchApi<PointCloudInfo>(`/dates/${date}/captures/${captureId}/point_cloud/info`);
