@@ -155,15 +155,23 @@ const MainContent: React.FC<MainContentProps> = ({
 
   return (
     <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
-      <Typography variant="h5" gutterBottom>
-        Capture: {capture.capture_id}
-      </Typography>
-      <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-        Date: {date}
-        {capture.has_labels && (
-          <Chip label="Labeled" color="success" size="small" sx={{ ml: 1 }} />
-        )}
-      </Typography>
+      <Grid container spacing={2}>
+          <Grid size={{ xs: 12, md: 10 }}>
+              <Typography variant="h5" gutterBottom>
+                Capture: {capture.capture_id}
+              </Typography>
+          </Grid>
+          <Grid size={{ xs: 12, md: 2 }} sx={{ textAlign: 'right' }}>
+              <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                Date: {date}
+                {capture.has_labels && (
+                  <Chip label="Labeled" color="success" size="small" sx={{ ml: 1 }} />
+                )}
+              </Typography>
+          </Grid>
+      </Grid>
+      
+      
 
       {saveMessage && (
         <Alert severity="success" sx={{ mb: 2 }}>

@@ -1,8 +1,7 @@
 /*
 * Thi is a the component for the filter section of the UI.
-* It allows users to filter captures based on various criteria.
-* So that it allows the user to go through the captures more easily.
-* Initially it will filter by date, but more filters can be added later.
+* For now is just a dropdown to select date.
+* M more filters can be added later.
 */
 import React from 'react';
 import Box from '@mui/material/Box';
@@ -28,15 +27,15 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           Date
         </InputLabel>
         <NativeSelect
-          defaultValue={selectedDate}
+          id="date-select"
+          value={selectedDate ?? ''} 
           inputProps={{
             name: 'date',
-            id: 'uncontrolled-native'
           }}
           onChange={(e) => onDateSelect(e.target.value)}
           >
             {dates.map((date) => (
-              <option value={date}>{date}</option>
+              <option key={date} value={date}>{date}</option>
             ))}
           </NativeSelect>
       </FormControl>
