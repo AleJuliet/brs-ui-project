@@ -128,13 +128,25 @@ async def get_image(
         
         # Convert back to PIL Image
         img = Image.fromarray(img_array, mode='RGBA')
+
+        # Resize if too large for faster transfer
+        MAX_W = 800
+        if img.width > MAX_W:
+            h = int(img.height * (MAX_W / img.width))
+            img = img.resize((MAX_W, h), Image.BILINEAR)
         
         # Save to bytes buffer
         buf = io.BytesIO()
-        img.save(buf, format='PNG')
+        # Convert to WEBP to reduce size
+        img.save(
+            buf,
+            format="WEBP",   # or "JPEG"
+            quality=75,      # 60–85 is a good range
+            method=4         # WebP encoding speed/quality tradeoff (0 fast, 6 best)
+        )
         buf.seek(0)
         
-        return StreamingResponse(buf, media_type="image/png")
+        return StreamingResponse(buf, media_type="image/webp")
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process image: {str(e)}")
