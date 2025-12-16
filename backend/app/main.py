@@ -101,13 +101,16 @@ async def get_image(
         # Convert to numpy array
         img_array = np.array(img)
         
-        # Handle RGB/RGBA by taking first channel (grayscale stored in all channels)
-        if img_array.ndim == 3:
-            img_array = img_array[:, :, 0]
         
         # Convert to float for processing
-        img_array = img_array.astype(np.float32)
-        
+        # Handle RGB/RGBA by taking first channel (grayscale stored in all channels)
+        if img_array.ndim == 3:
+            alpha_channel = np.full(img_array.shape[:2], 255, dtype=np.uint8)
+        else:
+            alpha_channel = img_array[:,:,3]
+
+        img_array = img_array[:,:,:3].astype(np.float32)
+
         # Stretch histogram from actual min/max to full 0-255 range
         img_min = img_array.min()
         img_max = img_array.max()
@@ -121,6 +124,7 @@ async def get_image(
         
         # Convert to uint8
         img_array = np.clip(img_array, 0, 255).astype(np.uint8)
+        img_array = np.dstack((img_array, alpha_channel))
         
         # Convert back to PIL Image
         img = Image.fromarray(img_array, mode='L')
