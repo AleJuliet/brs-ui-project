@@ -127,7 +127,7 @@ async def get_image(
         img_array = np.dstack((img_array, alpha_channel))
         
         # Convert back to PIL Image
-        img = Image.fromarray(img_array, mode='L')
+        img = Image.fromarray(img_array, mode='RGBA')
         
         # Save to bytes buffer
         buf = io.BytesIO()
