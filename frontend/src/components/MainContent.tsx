@@ -53,6 +53,7 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   const [captureDetail, setCaptureDetail] = useState<CaptureDetail | null>(null);
   const [pointCloudInfo, setPointCloudInfo] = useState<PointCloudInfo | null>(null);
+  const [pointCloudSnapshotUrl, setGetPointCloudSnapshotUrl] = useState<string | null>(null);
   const [labels, setLabels] = useState<Labels>({
     validity: '',
     color: '',
@@ -122,7 +123,9 @@ const MainContent: React.FC<MainContentProps> = ({
       if (detail.point_cloud_exists) {
         try {
           const pcInfo = await apiService.getPointCloudInfo(date, capture.capture_id);
-          setPointCloudInfo(pcInfo);
+          const snapshotUrl = apiService.getPointCloudSnapshotUrl(date, capture.capture_id);
+          setPointCloudInfo({ ...pcInfo });
+          setGetPointCloudSnapshotUrl(snapshotUrl);
         } catch (pcError) {
           console.warn('Failed to load point cloud info:', pcError);
           setPointCloudInfo({ exists: true });
@@ -278,8 +281,22 @@ const MainContent: React.FC<MainContentProps> = ({
                     Point Cloud Information
                   </Typography>
                   {pointCloudInfo ? (
-                    <PointCloudViewer date={date} captureId={capture.capture_id} />
-                  ) : (
+                    <Card>
+                        <CardMedia
+                          component="img"
+                          image={pointCloudSnapshotUrl || ''}
+                          alt={`Point cloud Image`}
+                          sx={{ height: 200, objectFit: 'contain' }}
+                          onClick={() => handleOpen(pointCloudSnapshotUrl || '', `Point cloud Image`)}
+                          style={{ cursor: 'pointer'  }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.nextElementSibling?.removeAttribute('style');
+                          }}
+                        />
+                  </Card>)
+                  : (
                     <Typography color="text.secondary">Loading point cloud info...</Typography>
                   )}
                 </Paper>

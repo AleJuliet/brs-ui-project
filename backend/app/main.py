@@ -1,10 +1,16 @@
 from fastapi import FastAPI, HTTPException, Path as FastAPIPath
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
+from typing import Any, List
 from PIL import Image
 import numpy as np
+import os
+os.environ["PYVISTA_OFF_SCREEN"] = "true"
+os.environ["VTK_USE_OFFSCREEN"] = "true"
+import pyvista as pv
 import io
+
+pv.global_theme.interactive = False
 
 from .config import CORS_ORIGINS
 from .models import CaptureSummary, CaptureDetail, Labels, PointCloudInfo
@@ -193,6 +199,69 @@ async def get_point_cloud_info(
         )
     except Exception as e:
         return PointCloudInfo(exists=True, num_points=None, file_size=pc_path.stat().st_size)
+    
+@app.get("/api/dates/{date}/captures/{capture_id}/point_cloud/snapshot")
+async def get_point_cloud_snapshot(
+    date: str = FastAPIPath(..., description="Date in YYYY-MM-DD format"),
+    capture_id: str = FastAPIPath(..., description="Capture ID")
+):
+    """Serve a snapshot of the point cloud file"""
+    pc_path = get_point_cloud_path(date, capture_id)
+    if not pc_path:
+        raise HTTPException(status_code=404, detail=f"Point cloud not found for capture {capture_id}")
+    
+    try:
+        # Load point cloud
+        point_cloud = np.load(pc_path, mmap_mode='r')
+
+        if point_cloud.ndim != 2 or point_cloud.shape[1] < 3:
+            raise HTTPException(status_code=400, detail=f"Unexpected point cloud shape {point_cloud.shape}")
+        
+        xyz = point_cloud.copy()
+        mask = xyz[:, 2] > 1.5
+        xyz = xyz[mask]
+
+        if xyz.size == 0:
+            raise HTTPException(status_code=400, detail="No points above Z > 1.5m for snapshot")
+
+        colors = xyz[:, 3].copy() if xyz.shape[1] >= 4 else None
+        divider = max(1, xyz.shape[0] // 2000)
+        xyz = xyz[::divider, :3]
+        if colors is not None:
+            colors = colors[::divider]
+
+        c = xyz.mean(axis=0)
+        point_cloud_pv = pv.PolyData(xyz)
+
+        plotter_kwargs: dict[str, Any] = {"render_points_as_spheres": True, "point_size": 3}
+        if colors is not None:
+            point_cloud_pv["colors"] = colors
+            plotter_kwargs["scalars"] = "colors"
+
+        # Headless rendering
+        plotter = pv.Plotter(off_screen=True, window_size=(768, 768))
+        plotter.set_background((0.9, 0.9, 0.9))
+        plotter.add_points(point_cloud_pv, **plotter_kwargs)
+
+        # Top view
+        position = (c[0], c[1], c[2] + 100)
+        view_up = (0.0, 1.0, 0.0)
+
+        plotter.camera_position = (position, tuple(c), view_up)
+        plotter.render()
+
+        img = plotter.screenshot(return_img=True)  # numpy HxWx3 uint8
+        plotter.close()
+        
+        # Encode WebP for speed
+        buf = io.BytesIO()
+        Image.fromarray(img).save(buf, format="WEBP", quality=75, method=4)
+        buf.seek(0)
+        
+        return StreamingResponse(buf, media_type="image/webp")
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process point cloud: {str(e)}")
     
 @app.get("/api/dates/{date}/captures/{capture_id}/point_cloud/downsampled")
 async def get_downsampled_point_cloud(
