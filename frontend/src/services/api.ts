@@ -80,5 +80,10 @@ export const apiService = {
   // Get downsampled point cloud data
   async getPointCloud(date: string, captureId: string, voxelSize: number = 0.1): Promise<{ points: number[][] }> {
     return fetchApi<{ points: number[][] }>(`/dates/${date}/captures/${captureId}/point_cloud/downsampled?voxel_size=${voxelSize}`);
+  },
+  
+  //Get json with the color mapping
+  async getColorMapping(): Promise<Record<string, string>> {
+    return fetchApi<Record<string, string>>('/color-mapping');
   }
 };
