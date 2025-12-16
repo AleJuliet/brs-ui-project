@@ -94,9 +94,19 @@ const MainContent: React.FC<MainContentProps> = ({
       
       const detail = await apiService.getCaptureDetail(date, capture.capture_id);
       const brickInfoText = await apiService.getBrickInfo(date, capture.capture_id);
+      const mappingColor = await apiService.getColorMapping();
 
       // Parse and convert brickInfoText to BrickInfo object
       const parsedBrickInfo = parseBrickInfo(brickInfoText);
+      // Change the value of color_prediction based on color mapping
+      if (parsedBrickInfo.color_prediction && mappingColor[parsedBrickInfo.color_prediction]) {
+        const colorId = parsedBrickInfo.color_prediction;
+        const colorData = mappingColor[String(colorId)];
+        // Extract just the name if it's an object, otherwise use the value directly
+        parsedBrickInfo.color_prediction = typeof colorData === 'object' && colorData !== null && 'name' in colorData
+          ? (colorData as { name: string }).name 
+          : (colorData ?? "Unknown color");
+      }
       setBrickInfo(parsedBrickInfo);
 
       setCaptureDetail(detail);

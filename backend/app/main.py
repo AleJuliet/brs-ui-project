@@ -1,15 +1,23 @@
 from fastapi import FastAPI, HTTPException, Path as FastAPIPath
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from typing import Any, List
 from PIL import Image
 import numpy as np
+import yaml
 import os
 os.environ["PYVISTA_OFF_SCREEN"] = "true"
 os.environ["VTK_USE_OFFSCREEN"] = "true"
 import pyvista as pv
 import io
+from pathlib import Path
 
+app = FastAPI()
+COLOR_YML = Path("config/color_mapping.yml")
+
+_color_cache = None
+_mtime = None
 pv.global_theme.interactive = False
 
 from .config import CORS_ORIGINS
@@ -275,6 +283,22 @@ async def get_downsampled_point_cloud(
     
     return downsampled_data
 
+@app.get("/api/color-mapping")
+async def get_color_mapping():
+    try:
+        global _color_cache, _mtime
+        mtime = COLOR_YML.stat().st_mtime
+
+        if _color_cache is None or _mtime != mtime:
+            with open("config/color_mapping.yml", "r") as file:
+                data = yaml.safe_load(file)
+
+            mapping = {str(k): v for k, v in data["color_mapping"].items()}
+            _color_cache = mapping
+            _mtime = mtime
+        return JSONResponse(_color_cache)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load color mapping: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
