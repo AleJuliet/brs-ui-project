@@ -54,12 +54,14 @@ const BRSApp: React.FC = () => {
     }
   };
 
-  const loadCaptures = async (date: string) => {
+  const loadCaptures = async (date: string, preserveSelection: boolean = false) => {
     try {
       setLoading(true);
       const captureList = await apiService.getCaptures(date);
       setCaptures(captureList);
-      setSelectedCapture(null); // Clear selected capture
+      if (!preserveSelection) {
+        setSelectedCapture(null); // Only clear if not preserving
+      }
     } catch (err) {
       setError(`Failed to load captures for ${date}: ${err}`);
     } finally {
@@ -79,7 +81,7 @@ const BRSApp: React.FC = () => {
   const handleLabelsUpdated = () => {
     // Refresh the captures list to update label status
     if (selectedDate) {
-      loadCaptures(selectedDate);
+      loadCaptures(selectedDate, true);
     }
   };
 
@@ -94,6 +96,7 @@ const BRSApp: React.FC = () => {
       {/* Sidebar */}
       <Drawer
         variant="permanent"
+        className='drawerNav'
         sx={{
           width: DRAWER_WIDTH,
           flexShrink: 0,
@@ -103,10 +106,15 @@ const BRSApp: React.FC = () => {
           },
         }}
       >
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h6" component="h1">
-            BRS Capture Review
-          </Typography>
+        <Box sx={{ p: 2 }} style={{ backgroundColor: '#ffd400' }}>
+          
+          {/* I want to add an image from the public folder here as a logo next to the title */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h6" component="h1" style={{ fontWeight: 'bold', color: '#000' }}>
+              BRS Capture Review
+            </Typography>
+            <img src="/bricks2.png" alt="BRS Logo" style={{ maxWidth: '20%', height: 'auto' }} />
+          </Box>
         </Box>
         <Divider />
 
@@ -157,9 +165,9 @@ const BRSApp: React.FC = () => {
                         </Typography>
                         {capture.has_labels && (
                           <Chip
-                            label="Labeled"
+                            label="Checked"
                             size="small"
-                            color="success"
+                            style={{backgroundColor: '#00af4d'}}
                             sx={{ mt: 0.5, fontSize: '0.6rem', height: 16 }}
                           />
                         )}

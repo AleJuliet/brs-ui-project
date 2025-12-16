@@ -166,6 +166,8 @@ const MainContent: React.FC<MainContentProps> = ({
       
       // Clear message after 3 seconds
       setTimeout(() => setSaveMessage(null), 3000);
+
+      
     } catch (err) {
       setError(`Failed to save labels: ${err}`);
     } finally {
@@ -221,7 +223,7 @@ const MainContent: React.FC<MainContentProps> = ({
               <Typography variant="subtitle1" color="text.secondary" gutterBottom>
                 Date: {date}
                 {capture.has_labels && (
-                  <Chip label="Labeled" color="success" size="small" sx={{ ml: 1 }} />
+                  <Chip label="Checked" color="success" size="small" sx={{ ml: 1 }} />
                 )}
               </Typography>
           </Grid>
@@ -252,7 +254,7 @@ const MainContent: React.FC<MainContentProps> = ({
                           component="img"
                           image={url}
                           alt={`${cameraId} Image`}
-                          sx={{ height: 150, objectFit: 'contain' }}
+                          sx={{ height: 130, objectFit: 'contain' }}
                           onClick={() => handleOpen(url, cameraId)}
                           style={{ cursor: 'pointer'  }}
                           onError={(e) => {
@@ -333,7 +335,7 @@ const MainContent: React.FC<MainContentProps> = ({
                       fullWidth
                       variant="contained"
                       style={{ backgroundColor: '#e0e0e0', color: 'black' }}
-                      onClick={handleSave}
+                      onClick={handleSaveAndNext}
                       disabled={saving}
                     >
                       {saving ? 'Saving...' : (

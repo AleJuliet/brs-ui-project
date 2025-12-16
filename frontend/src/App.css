@@ -4,6 +4,7 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  background: #f9f9fb;
 }
 
 .image-grid {
@@ -44,4 +45,9 @@
 
 .capture-item.labeled {
   border-left: 4px solid #4caf50;
+}
+
+.drawerNav .MuiPaper-root {
+  border-right: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 3px 0 6px rgba(0,0,0,0.06);
 }
