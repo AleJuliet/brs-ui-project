@@ -305,50 +305,91 @@ const MainContent: React.FC<MainContentProps> = ({
           </Grid>
         </Grid>
 
-          {/* Info and buttons*/}
-          <Grid size={{ xs: 12, md: 4 }}>
-           {brickInfo && (
-                <Paper sx={{ p: 2, mt: 2 }}>
-                <InfoSection capture={brickInfo} />
-                </Paper>
-            )}
-            <Paper sx={{ p: 2, mt: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Validation
-              </Typography>
-              {/** Checkbox asking validation correct color and shape */}
-              <FormGroup>
-                <FormControlLabel
-                  control={<Checkbox checked={labels.correctColor} onChange={(e) => handleLabelChange('correctColor', e.target.checked)} />}
-                  label="Correct Color"
-                />
-                <FormControlLabel
-                  control={<Checkbox checked={labels.correctShape} onChange={(e) => handleLabelChange('correctShape', e.target.checked)} />}
-                  label="Correct Shape"
-                />
-              </FormGroup>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<SaveIcon />}
-                  onClick={handleSave}
-                  disabled={saving}
-                >
-                  {saving ? 'Saving...' : 'Save Labels'}
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  endIcon={<NextIcon />}
-                  onClick={handleSaveAndNext}
-                  disabled={saving || !nextCapture}
-                >
-                  {saving ? 'Saving...' : 'Save & Next'}
-                </Button>
-              </Box>
-            </Paper>  
-          </Grid>
+        {/* Info and buttons*/}
+        <Grid size={{ xs: 12, md: 4 }}>
+          {brickInfo && (
+              <Paper sx={{ p: 2, mt: 2 }}>
+              <InfoSection capture={brickInfo} />
+              </Paper>
+          )}
+          <Paper sx={{ p: 2, mt: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Validation
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      style={{ backgroundColor: '#e0e0e0', color: 'black' }}
+                      onClick={handleSave}
+                      disabled={saving}
+                    >
+                      {saving ? 'Saving...' : (
+                        <>
+                          ✅ Color
+                          <br />
+                          ✅ Shape
+                        </>
+                      )}
+                    </Button>
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      style={{ backgroundColor: '#e0e0e0', color: 'black' }}
+                      onClick={handleSaveAndNext}
+                      disabled={saving || !nextCapture}
+                    >
+                      {saving ? 'Saving...' : (
+                        <>
+                          ✅ Color 
+                          <br />
+                          ❌ Shape
+                        </>
+                      )}
+                    </Button>
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      style={{ backgroundColor: '#e0e0e0', color: 'black' }}
+                      onClick={handleSaveAndNext}
+                      disabled={saving || !nextCapture}
+                    >
+                      {saving ? 'Saving...' : (
+                        <>
+                          ❌ Color
+                          <br />
+                          ✅ Shape'
+                          </>
+                        )}
+                    </Button>
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      style={{ backgroundColor: '#e0e0e0', color: 'black' }}
+                      onClick={handleSaveAndNext}
+                      disabled={saving || !nextCapture}
+                    >
+                      {saving ? 'Saving...' : (
+                        <>
+                        ❌ Color 
+                        <br />
+                        ❌ Shape
+                        </>
+                      )}
+                    </Button>
+                </Grid>
+              </Grid>
+            </Box>
+          </Paper>  
+        </Grid>
 
       </Grid>
 
