@@ -19,11 +19,7 @@ const InfoSection: React.FC<InfoSectionProps> = ({ capture }) => {
       <Typography variant="h6" gutterBottom>
         Capture Information
       </Typography>
-      <Typography variant="body1">Trigger ID: {capture.trigger_id}</Typography>
       <Typography variant="body1">Color Prediction: {capture.color_prediction}</Typography>
-      <Typography variant="body1">Photo Timestamp: {capture.photo_timestamp}</Typography>
-      <Typography variant="body1">Brick ID: {capture.brick_id}</Typography>
-      <Typography variant="body1">Laser Timestamp: {capture.laser_timestamp}</Typography>
       <Typography variant="body1">Super ID: {capture.super_id}</Typography>
       <Typography variant="body1">Bucket Number: {capture.bucket_number}</Typography>
     </Box>
