@@ -140,7 +140,7 @@ const MainContent: React.FC<MainContentProps> = ({
     }
   };
 
-  const handleLabelChange = (field: keyof Labels, value: string) => {
+  const handleLabelChange = (field: keyof Labels, value: string | boolean) => {
     setLabels(prev => ({ ...prev, [field]: value }));
     setSaveMessage(null); // Clear save message when editing
   };
@@ -242,7 +242,7 @@ const MainContent: React.FC<MainContentProps> = ({
                           component="img"
                           image={url}
                           alt={`${cameraId} Image`}
-                          sx={{ height: 200, objectFit: 'cover' }}
+                          sx={{ height: 150, objectFit: 'contain' }}
                           onClick={() => handleOpen(url, cameraId)}
                           style={{ cursor: 'pointer'  }}
                           onError={(e) => {
