@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from typing import List, Optional
 import re
+import zipfile
 import numpy as np
 
 from .config import RESULTS_ROOT
@@ -57,8 +58,7 @@ def get_capture_detail(date: str, capture_id: str) -> Optional[CaptureDetail]:
             images[camera] = f"/api/dates/{date}/captures/{capture_id}/image/{camera}"
     
     # Check for point cloud
-    point_cloud_file = capture_path / "point_cloud.npy"
-    point_cloud_exists = point_cloud_file.exists()
+    point_cloud_exists = _check_point_cloud_exists(capture_path)
     point_cloud_path = f"/api/dates/{date}/captures/{capture_id}/point_cloud/info" if point_cloud_exists else None
     
     return CaptureDetail(
@@ -82,7 +82,7 @@ def _create_capture_summary(capture_path: Path, date: str) -> Optional[CaptureSu
             image_count += 1
     
     # Check for point cloud
-    has_point_cloud = (capture_path / "point_cloud.npy").exists()
+    has_point_cloud = _check_point_cloud_exists(capture_path)
     
     # Load manifest to check labels
     manifest = load_manifest(capture_path)
@@ -107,11 +107,47 @@ def get_image_path(date: str, capture_id: str, camera_id: str) -> Optional[Path]
     image_path = RESULTS_ROOT / date / capture_id / f"{camera_id}.png"
     return image_path if image_path.exists() else None
 
+def _check_point_cloud_exists(capture_path: Path) -> bool:
+    """Check if point cloud exists (either .npy or .zip)"""
+    npy_path = capture_path / "point_cloud.npy"
+    zip_path = capture_path / "point_cloud.zip"
+    
+    if npy_path.exists():
+        return True
+    
+    # Check if zip exists and contains point_cloud.npy
+    if zip_path.exists():
+        try:
+            with zipfile.ZipFile(zip_path, 'r') as zf:
+                return 'point_cloud.npy' in zf.namelist()
+        except:
+            return False
+    
+    return False
 
 def get_point_cloud_path(date: str, capture_id: str) -> Optional[Path]:
-    """Get the full path to a point cloud file"""
-    pc_path = RESULTS_ROOT / date / capture_id / "point_cloud.npy"
-    return pc_path if pc_path.exists() else None
+    """Get the full path to a point cloud file, extracting from zip if needed"""
+    capture_path = RESULTS_ROOT / date / capture_id
+    npy_path = capture_path / "point_cloud.npy"
+    zip_path = capture_path / "point_cloud.zip"
+    
+    # If .npy exists directly, return it
+    if npy_path.exists():
+        return npy_path
+    
+    # If .zip exists, extract it to the same directory
+    if zip_path.exists():
+        try:
+            with zipfile.ZipFile(zip_path, 'r') as zf:
+                if 'point_cloud.npy' in zf.namelist():
+                    # Extract to the capture directory for caching
+                    zf.extract('point_cloud.npy', capture_path)
+                    return npy_path
+        except Exception as e:
+            print(f"Error extracting point cloud from zip: {e}")
+            return None
+    
+    return None
 
 def get_brick_info_path(date: str, capture_id: str) -> Optional[Path]:
     """Get the full path to the brick_info.txt file"""
