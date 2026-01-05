@@ -27,6 +27,7 @@ export interface CaptureSummary {
 export interface BrickInfo {
   trigger_id: string;
   color_prediction: string;
+  color_rgb: number[]; // [R, G, B]
   photo_timestamp: string;
   brick_id: string;
   laser_timestamp: string;

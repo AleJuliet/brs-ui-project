@@ -102,10 +102,17 @@ const MainContent: React.FC<MainContentProps> = ({
       if (parsedBrickInfo.color_prediction && mappingColor[parsedBrickInfo.color_prediction]) {
         const colorId = parsedBrickInfo.color_prediction;
         const colorData = mappingColor[String(colorId)];
-        // Extract just the name if it's an object, otherwise use the value directly
-        parsedBrickInfo.color_prediction = typeof colorData === 'object' && colorData !== null && 'name' in colorData
-          ? (colorData as { name: string }).name 
-          : (colorData ?? "Unknown color");
+        // Extract name and RGB if it's an object
+        if (typeof colorData === 'object' && colorData !== null) {
+          if ('name' in colorData) {
+            parsedBrickInfo.color_prediction = (colorData as { name: string }).name;
+          }
+          if ('rgb' in colorData) {
+            parsedBrickInfo.color_rgb = (colorData as { rgb: number[] }).rgb;
+          }
+        } else {
+          parsedBrickInfo.color_prediction = colorData ?? "Unknown color";
+        }
       }
       setBrickInfo(parsedBrickInfo);
 
