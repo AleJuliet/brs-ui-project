@@ -111,7 +111,7 @@ const BRSApp: React.FC = () => {
           {/* I want to add an image from the public folder here as a logo next to the title */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="h6" component="h1" style={{ fontWeight: 'bold', color: '#000' }}>
-              BRS Capture Review
+              BRS Classification Review
             </Typography>
             <img src="/bricks2.png" alt="BRS Logo" style={{ maxWidth: '20%', height: 'auto' }} />
           </Box>

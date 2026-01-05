@@ -83,12 +83,20 @@ This creates a sample data structure in `sample_data/out/results/` with:
 # Navigate to backend directory
 cd backend
 
+# Python 3.11 is needed for this, VTK doesnt dupport a higher version of Python
+brew install python@3.11
+
 # Create and activate virtual environment
-python3 -m venv venv
+python3.11 -m venv venv
+
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
+# Verify Python version
+python --version  # Should show Python 3.11.x
+
+
 # Install dependencies
-pip install -r requirements.txt
+pip3.11 install -r requirements.txt
 
 # Configure the results path (if using custom data)
 # Edit backend/app/config.py and set RESULTS_ROOT to your data path
